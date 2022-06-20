@@ -1,0 +1,39 @@
+name: "Infra-Plan"
+
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  infra:
+    name: "Infra-Plan"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials from Test account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:	
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRETE_ID }}
+          aws-region: 'eu-west-1'
+
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
+        with:
+          terragrunt_version: 0.21.13
+
+      - name: Terrgrunt Init
+        id: init
+        run: |
+          cd terragrunt/dev/eks
+          terragrunt init
+
+      - name: Terragrunt Plan
+        id: plan
+        run: |
+          cd terragrunt/dev/eks
+          terragrunt plan
